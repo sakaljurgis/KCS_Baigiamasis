@@ -13,7 +13,7 @@ $createTable = 'create table products
     sku varchar(64) null,
     price decimal(11,4) not null,
     quantity int(10) null,
-    created_at DEFAULT CURRENT_TIMESTAMP,
+    created_at datetime DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );';

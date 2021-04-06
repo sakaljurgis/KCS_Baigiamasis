@@ -1,10 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
+<!doctype html>
+<html lang="lt">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link type="text/css" rel="stylesheet" href="./css/bootstrap.css" />
+        <link type="text/css" rel="stylesheet" href="./css/bootstrap-vue.css" />
+
+
+        <title>Baigiamasis</title>
+
+    </head>
+    <body class="container">
+        <header class="container text-center">
+            <h1>Labas, pasauli!</h1>
+        </header>
+
+        <div id="app" class="container row">
+            <aside class="col-3">
+                <main-menu></main-menu>
+            </aside>
+            <main id="content" class="col-9">
+                <products-list></products-list>
+            </main>
+        </div>
+
+        <footer class="container text-center border-top">
+            Some footer text here.
+        </footer>
+
+        <script src="./js/vue.js"></script>
+        <script src="./js/bootstrap-vue.js"></script>
+        <script src="./js/bootstrap-vue-icons.js"></script>
+        <script src="./js/httpVueLoader.js"></script>
+
+        <script>
+            var hash = Math.random().toString(36).substring(2, 8) // prevent caching
+
+            const app = new Vue({
+                el: "#app",
+                components: {
+                    'main-menu': httpVueLoader('./templates/main-menu.vue?' + hash),
+                    'index-content': httpVueLoader('/templates/index-content.vue?' + hash),
+                    'products-list': httpVueLoader('./templates/products-list.vue?' + hash)
+                }
+            });
+        </script>
+    </body>
 </html>

@@ -4,6 +4,7 @@ namespace KCS\Repository;
 
 use Exception;
 use KCS\DbConnect as DB;
+use KCS\Model\BaseModel;
 use KCS\Model\ModelInterface;
 use PDO;
 use RuntimeException;
@@ -21,16 +22,53 @@ abstract class BaseRepository implements RepositoryInterface
         $this->conn = $conn->getConn();
     }
 
-    public function storeAndReturn($params): ModelInterface
+    public function all(): array
+    {
+        $table = $this->getTableName();
+        $stmt = $this->conn->prepare("SELECT * FROM $table");
+        $model = $this->getModelClass();
+        $stmt->setFetchMode(PDO::FETCH_CLASS, $model);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function one($id): BaseModel
+    {
+        $table = $this->getTableName();
+        $stmt = $this->conn->prepare("SELECT * FROM $table WHERE id = :id");
+        $stmt->bindValue(":id", $id);
+        $model = $this->getModelClass();
+        $stmt->setFetchMode(PDO::FETCH_CLASS, $model);
+        $stmt->execute();
+        if ($stmt->rowCount()) {
+            return $stmt->fetch();
+        } else {
+            throw new \Exception("Entry id '$id' not found");
+        }
+    }
+
+    public function storeAndReturn($params): BaseModel
     {
         $table = $this->getTableName();
 
         $status = $this->store($params, $table);
 
         if ($status) {
-            return $this->getLastInsertedVisitor($table);
+            return $this->getLastInserted($table);
         }
-        throw new RuntimeException('Gote some error when storing record');
+        throw new RuntimeException('Got some error when storing record');
+    }
+
+    public function updateAndReturn($id, $params): BaseModel
+    {
+        $table = $this->getTableName();
+        $status = $this->update($id, $params, $table);
+
+        if ($status) {
+            return $this->one($id);
+        }
+        throw new RuntimeException('Got some error when storing record');
     }
 
     protected function getTableName(): string
@@ -67,7 +105,7 @@ abstract class BaseRepository implements RepositoryInterface
      * @return mixed
      * @throws Exception
      */
-    private function getLastInsertedVisitor(string $table)
+    private function getLastInserted(string $table)
     {
         $id = $this->conn->lastInsertId();
         $stmt = $this->conn->prepare("SELECT * FROM $table WHERE id = :id");
@@ -106,5 +144,33 @@ abstract class BaseRepository implements RepositoryInterface
         }
         $status = $stmt->execute();
         return $status;
-}
+    }
+
+    public function update($id, $params, string $table): bool
+    {
+        //$paramNames = array_keys($params);
+        //$sql = "UPDATE products SET name = :name, sku = :sku WHERE id = :id;";
+        $parameters = [];
+        foreach ($params as $key => $value) {
+            $parameters[] = "$key = :$key";
+        }
+        $sql = "UPDATE $table SET ". implode(", ", $parameters) ." WHERE id = :id;";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':'.$key, $value);
+        }
+        $status = $stmt->execute();
+        return $status;
+    }
+
+    public function delete($id): bool
+    {
+        $table = $this->getTableName();
+        $sql = "DELETE FROM `$table` WHERE id = :id;";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        return $stmt->execute();
+    }
+
 }

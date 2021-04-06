@@ -3,14 +3,6 @@
 </template>
 
 <script>
-/*
-export default {
-  name: "test-component",
-  data : {
-    testText: "adfdsaf"
-  }
-}
-*/
 
 module.exports = {
   data: function() {

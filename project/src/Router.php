@@ -1,7 +1,7 @@
 <?php
 
-
 namespace KCS;
+
 use DI\Container;
 use Pecee\SimpleRouter\SimpleRouter;
 
@@ -33,7 +33,7 @@ class Router
                 $result = $controller->$action($args);
 
                 $render = $container->get(Render::class);
-                $render->responseType('html');
+                $render->responseType('json');
                 return $render->render($result);
             };
 
