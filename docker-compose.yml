@@ -1,0 +1,42 @@
+version: '3.3'
+services:
+  web_1:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+    volumes:
+      - ./project:/var/www/html/
+    ports:
+      - 8080:80
+    depends_on:
+      - db_1
+    environment:
+      APACHE_SERVER_NAME: sklk
+      APPLICATION_ENV: development
+      PHP_IDE_CONFIG: "serverName=sklk"
+
+  db_1:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kcs_db
+      MYSQL_USER: devuser
+      MYSQL_PASSWORD: devpass
+
+  phpmyadmin_1:
+    image: phpmyadmin/phpmyadmin:latest
+    depends_on:
+      - db_1
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db_1
+      PMA_USER: devuser
+      PMA_PASSWORD: devpass
+      UPLOAD_LIMIT: 2048
